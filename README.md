@@ -1,0 +1,1 @@
+### QR & Barcode Scanner for Android and iOS
