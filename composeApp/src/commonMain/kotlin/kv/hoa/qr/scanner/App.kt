@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kv.hoa.qr.scanner.theme.Gray
 import kv.hoa.qr.scanner.theme.White
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -32,7 +33,13 @@ import qrscanner.composeapp.generated.resources.ic_share
 @Composable
 @Preview
 fun App() {
-    val qrCode = remember { mutableStateOf("Temp value with a very long text for testing the UI displaying") }
+    val defaultText = "Scan a QR code to see the result here"
+    val qrCode = remember { mutableStateOf(defaultText) }
+    val qrTextColor = if (qrCode.value != defaultText) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        Gray
+    }
 
     MaterialTheme {
         Column(
@@ -42,31 +49,30 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-//            Text(
-//                text = "QR & Barcode Scanner",
-//                color = MaterialTheme.colorScheme.onPrimaryContainer,
-//                fontWeight = FontWeight.SemiBold,
-//                style = MaterialTheme.typography.headlineMedium,
-//                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-//            )
             ScannerWithPermissions(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f),
                 types = listOf(CodeType.QR),
                 onScanned = { scannedCode ->
-                    qrCode.value = scannedCode
+                    if (scannedCode.isEmpty()) {
+                        qrCode.value = defaultText
+                    } else {
+                        qrCode.value = scannedCode
+                    }
                     false
                 }
             )
             Text(
                 text = qrCode.value,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                color = qrTextColor
             )
             Spacer(modifier = Modifier.weight(1f))
-            ShareBox()
+            if (qrCode.value != defaultText) {
+                ShareBox()
+            }
             Spacer(modifier = Modifier.weight(1f))
         }
     }
