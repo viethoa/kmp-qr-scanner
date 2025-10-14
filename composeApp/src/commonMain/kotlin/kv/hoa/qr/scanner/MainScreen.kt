@@ -18,8 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kv.hoa.qr.scanner.MainViewModel.Companion.DEFAULT_TEXT
 import kv.hoa.qr.scanner.theme.Gray
 import kv.hoa.qr.scanner.theme.White
 import org.jetbrains.compose.resources.painterResource
@@ -32,10 +32,9 @@ import qrscanner.composeapp.generated.resources.ic_share
 
 @Composable
 @Preview
-fun App() {
-    val defaultText = "Scan a QR code to see the result here"
-    val qrCode = remember { mutableStateOf(defaultText) }
-    val qrTextColor = if (qrCode.value != defaultText) {
+fun MainScreen(viewModel: MainViewModel = MainViewModel()) {
+    val qrCode = remember { mutableStateOf(DEFAULT_TEXT) }
+    val qrTextColor = if (qrCode.value != DEFAULT_TEXT) {
         MaterialTheme.colorScheme.onPrimaryContainer
     } else {
         Gray
@@ -55,11 +54,7 @@ fun App() {
                     .aspectRatio(1f),
                 types = listOf(CodeType.QR),
                 onScanned = { scannedCode ->
-                    if (scannedCode.isEmpty()) {
-                        qrCode.value = defaultText
-                    } else {
-                        qrCode.value = scannedCode
-                    }
+                    qrCode.value = viewModel.onScanned(qrCode = scannedCode)
                     false
                 }
             )
@@ -70,7 +65,7 @@ fun App() {
                 color = qrTextColor
             )
             Spacer(modifier = Modifier.weight(1f))
-            if (qrCode.value != defaultText) {
+            if (qrCode.value != DEFAULT_TEXT) {
                 ShareBox()
             }
             Spacer(modifier = Modifier.weight(1f))
