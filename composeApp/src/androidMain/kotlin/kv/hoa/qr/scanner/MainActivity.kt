@@ -14,7 +14,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MainScreen(
-                shareHelper = ShareHelper(this)
+                shareHelper = ShareHelper(this),
+                toastHelper = ToastHelper(this.applicationContext)
             )
         }
     }
@@ -23,5 +24,5 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    // MainScreen(shareHelper = ShareHelper())
+    MainScreen()
 }

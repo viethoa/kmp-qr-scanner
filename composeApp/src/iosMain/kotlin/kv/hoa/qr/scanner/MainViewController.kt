@@ -3,5 +3,8 @@ package kv.hoa.qr.scanner
 import androidx.compose.ui.window.ComposeUIViewController
 
 fun MainViewController() = ComposeUIViewController {
-    MainScreen(ShareHelper())
+    MainScreen(
+        shareHelper = ShareHelper(),
+        toastHelper = ToastHelper()
+    )
 }

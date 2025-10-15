@@ -39,7 +39,8 @@ import qrscanner.composeapp.generated.resources.ic_share
 @Composable
 @Preview
 fun MainScreen(
-    shareHelper: ShareHelper,
+    toastHelper: ToastHelper? = null,
+    shareHelper: ShareHelper? = null,
     viewModel: MainViewModel = MainViewModel()
 ) {
     val clipboardManager = LocalClipboard.current
@@ -79,7 +80,7 @@ fun MainScreen(
             Spacer(modifier = Modifier.weight(1f))
             if (qrCode.value != DEFAULT_TEXT) {
                 ShareBox(
-                    onCopyQrCode = { copyToClipboard(qrCode.value, clipboardManager, coroutineScope) },
+                    onCopyQrCode = { copyToClipboard(qrCode.value, toastHelper, clipboardManager, coroutineScope) },
                     onShareQrCode = { shareQrCode(qrCode.value, shareHelper) }
                 )
             }
@@ -94,7 +95,7 @@ private fun ShareBox(
     onCopyQrCode: () -> Unit
 ) {
     Row {
-        Column(modifier = Modifier.padding(horizontal = 18.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Image(
                 painter = painterResource(Res.drawable.ic_share),
                 contentDescription = "share",
@@ -112,7 +113,7 @@ private fun ShareBox(
                     .align(Alignment.CenterHorizontally)
             )
         }
-        Column(modifier = Modifier.padding(horizontal = 18.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Image(
                 painter = painterResource(Res.drawable.ic_copy),
                 contentDescription = "Copy",
@@ -135,21 +136,23 @@ private fun ShareBox(
 
 private fun copyToClipboard(
     qrCode: String,
+    toastHelper: ToastHelper?,
     clipboardManager: Clipboard,
     coroutineScope: CoroutineScope
 ) {
     coroutineScope.launch {
         if (qrCode.isNotEmpty() && qrCode != DEFAULT_TEXT) {
             clipboardManager.setClipEntry(qrCode.toClipEntry())
+            toastHelper?.showToast("Copied")
         }
     }
 }
 
 private fun shareQrCode(
     qrCode: String,
-    shareHelper: ShareHelper
+    shareHelper: ShareHelper?
 ) {
     if (qrCode.isNotEmpty() && qrCode != DEFAULT_TEXT) {
-        shareHelper.shareText(qrCode)
+        shareHelper?.shareText(qrCode)
     }
 }
