@@ -38,7 +38,10 @@ import qrscanner.composeapp.generated.resources.ic_share
 
 @Composable
 @Preview
-fun MainScreen(viewModel: MainViewModel = MainViewModel()) {
+fun MainScreen(
+    shareHelper: ShareHelper,
+    viewModel: MainViewModel = MainViewModel()
+) {
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -77,7 +80,7 @@ fun MainScreen(viewModel: MainViewModel = MainViewModel()) {
             if (qrCode.value != DEFAULT_TEXT) {
                 ShareBox(
                     onCopyQrCode = { copyToClipboard(qrCode.value, clipboardManager, coroutineScope) },
-                    onShareQrCode = {}
+                    onShareQrCode = { shareQrCode(qrCode.value, shareHelper) }
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -139,5 +142,14 @@ private fun copyToClipboard(
         if (qrCode.isNotEmpty() && qrCode != DEFAULT_TEXT) {
             clipboardManager.setClipEntry(qrCode.toClipEntry())
         }
+    }
+}
+
+private fun shareQrCode(
+    qrCode: String,
+    shareHelper: ShareHelper
+) {
+    if (qrCode.isNotEmpty() && qrCode != DEFAULT_TEXT) {
+        shareHelper.shareText(qrCode)
     }
 }
