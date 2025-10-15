@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ import org.publicvalue.multiplatform.qrcode.CodeType
 import org.publicvalue.multiplatform.qrcode.ScannerWithPermissions
 import qrscanner.composeapp.generated.resources.Res
 import qrscanner.composeapp.generated.resources.ic_copy
+import qrscanner.composeapp.generated.resources.ic_open
 import qrscanner.composeapp.generated.resources.ic_share
 
 @Composable
@@ -43,6 +45,7 @@ fun MainScreen(
     shareHelper: ShareHelper? = null,
     viewModel: MainViewModel = MainViewModel()
 ) {
+    val uriHandler = LocalUriHandler.current
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -80,8 +83,10 @@ fun MainScreen(
             Spacer(modifier = Modifier.weight(1f))
             if (qrCode.value != DEFAULT_TEXT) {
                 ShareBox(
+                    isLink = qrCode.value.startsWith("http"),
                     onCopyQrCode = { copyToClipboard(qrCode.value, toastHelper, clipboardManager, coroutineScope) },
-                    onShareQrCode = { shareQrCode(qrCode.value, shareHelper) }
+                    onShareQrCode = { shareQrCode(qrCode.value, shareHelper) },
+                    onOpenLink = { uriHandler.openUri(qrCode.value) }
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -91,18 +96,46 @@ fun MainScreen(
 
 @Composable
 private fun ShareBox(
+    isLink: Boolean,
     onShareQrCode: () -> Unit,
-    onCopyQrCode: () -> Unit
+    onCopyQrCode: () -> Unit,
+    onOpenLink: () -> Unit
 ) {
     Row {
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        if (isLink) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .clickable { onOpenLink() }
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_open),
+                    contentDescription = "Open",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                Text(
+                    text = "Open",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
+        }
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .clickable { onShareQrCode() }
+        ) {
             Image(
                 painter = painterResource(Res.drawable.ic_share),
-                contentDescription = "share",
+                contentDescription = "Share",
                 modifier = Modifier
                     .size(40.dp)
                     .align(Alignment.CenterHorizontally)
-                    .clickable { onShareQrCode() }
             )
             Text(
                 text = "Share",
@@ -113,14 +146,17 @@ private fun ShareBox(
                     .align(Alignment.CenterHorizontally)
             )
         }
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .clickable { onCopyQrCode() }
+        ) {
             Image(
                 painter = painterResource(Res.drawable.ic_copy),
                 contentDescription = "Copy",
                 modifier = Modifier
                     .size(40.dp)
                     .align(Alignment.CenterHorizontally)
-                    .clickable { onCopyQrCode() }
             )
             Text(
                 text = "Copy",
