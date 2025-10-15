@@ -41,9 +41,10 @@ import qrscanner.composeapp.generated.resources.ic_share
 @Composable
 @Preview
 fun MainScreen(
-    toastHelper: ToastHelper? = null,
-    shareHelper: ShareHelper? = null,
-    viewModel: MainViewModel = MainViewModel()
+    toastHelper: ToastHelper,
+    shareHelper: ShareHelper,
+    vibrateHelper: VibrateHelper,
+    viewModel: MainViewModel = MainViewModel(vibrateHelper)
 ) {
     val uriHandler = LocalUriHandler.current
     val clipboardManager = LocalClipboard.current

@@ -4,7 +4,9 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class MainViewModel {
+class MainViewModel(
+    private val vibrateHelper: VibrateHelper
+) {
 
     companion object {
         const val DEFAULT_TEXT = "Scan a QR or Barcode to see the result here"
@@ -24,14 +26,14 @@ class MainViewModel {
         if (qrCode != lastScannedQr) {
             lastScannedQr = qrCode
             lastScannedTime = currentTime
-            // Todo vibrate
+            vibrateHelper.vibrate(200)
             return qrCode
         }
 
         val period = currentTime - lastScannedTime
         if (period >= DUP_ITEM_TIME_OUT) {
             lastScannedTime = currentTime
-            // Todo vibrate
+            vibrateHelper.vibrate(200)
             return qrCode
         }
 

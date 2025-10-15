@@ -5,6 +5,7 @@ import androidx.compose.ui.window.ComposeUIViewController
 fun MainViewController() = ComposeUIViewController {
     MainScreen(
         shareHelper = ShareHelper(),
-        toastHelper = ToastHelper()
+        toastHelper = ToastHelper(),
+        vibrateHelper = VibrateHelper()
     )
 }
