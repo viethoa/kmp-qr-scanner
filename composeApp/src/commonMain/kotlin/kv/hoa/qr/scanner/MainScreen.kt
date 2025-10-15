@@ -2,6 +2,7 @@ package kv.hoa.qr.scanner
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,9 +17,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kv.hoa.qr.scanner.MainViewModel.Companion.DEFAULT_TEXT
 import kv.hoa.qr.scanner.theme.Gray
 import kv.hoa.qr.scanner.theme.White
@@ -33,6 +39,9 @@ import qrscanner.composeapp.generated.resources.ic_share
 @Composable
 @Preview
 fun MainScreen(viewModel: MainViewModel = MainViewModel()) {
+    val clipboardManager = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
+
     val qrCode = remember { mutableStateOf(DEFAULT_TEXT) }
     val qrTextColor = if (qrCode.value != DEFAULT_TEXT) {
         MaterialTheme.colorScheme.onPrimaryContainer
@@ -66,7 +75,10 @@ fun MainScreen(viewModel: MainViewModel = MainViewModel()) {
             )
             Spacer(modifier = Modifier.weight(1f))
             if (qrCode.value != DEFAULT_TEXT) {
-                ShareBox()
+                ShareBox(
+                    onCopyQrCode = { copyToClipboard(qrCode.value, clipboardManager, coroutineScope) },
+                    onShareQrCode = {}
+                )
             }
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -74,7 +86,10 @@ fun MainScreen(viewModel: MainViewModel = MainViewModel()) {
 }
 
 @Composable
-private fun ShareBox() {
+private fun ShareBox(
+    onShareQrCode: () -> Unit,
+    onCopyQrCode: () -> Unit
+) {
     Row {
         Column(modifier = Modifier.padding(horizontal = 18.dp)) {
             Image(
@@ -83,6 +98,7 @@ private fun ShareBox() {
                 modifier = Modifier
                     .size(40.dp)
                     .align(Alignment.CenterHorizontally)
+                    .clickable { onShareQrCode() }
             )
             Text(
                 text = "Share",
@@ -100,6 +116,7 @@ private fun ShareBox() {
                 modifier = Modifier
                     .size(40.dp)
                     .align(Alignment.CenterHorizontally)
+                    .clickable { onCopyQrCode() }
             )
             Text(
                 text = "Copy",
@@ -109,6 +126,18 @@ private fun ShareBox() {
                     .padding(vertical = 10.dp)
                     .align(Alignment.CenterHorizontally)
             )
+        }
+    }
+}
+
+private fun copyToClipboard(
+    qrCode: String,
+    clipboardManager: Clipboard,
+    coroutineScope: CoroutineScope
+) {
+    coroutineScope.launch {
+        if (qrCode.isNotEmpty() && qrCode != DEFAULT_TEXT) {
+            clipboardManager.setClipEntry(qrCode.toClipEntry())
         }
     }
 }
